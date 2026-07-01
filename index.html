@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>항생제 용량 계산기 | JAAE Hospital</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#D8E4F0;padding:16px;font-size:13px}
+.wrap{max-width:520px;margin:0 auto;background:#EEF2F7;border-radius:24px;padding:14px;box-shadow:0 4px 20px rgba(27,58,92,0.13)}
+.hdr{background:#1B3A5C;border-radius:14px;padding:14px 16px;margin-bottom:10px;color:#fff;text-align:center}
+.hdr-top{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:3px}
+.hdr h1{font-size:16px;font-weight:700}
+.hdr-jaae{font-size:14px;font-weight:700;color:#4AE880;white-space:nowrap}
+.hdr p{font-size:11px;opacity:.8;line-height:1.4;text-align:center}
+@media (max-width:480px){
+  .hdr-top{flex-direction:column;gap:2px}
+}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.card-title{font-size:11px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.field label{display:block;font-size:11px;color:#666;font-weight:600;margin-bottom:4px}
+.field input{width:100%;padding:10px 11px;font-size:15px;border:1.5px solid #DDE2EA;border-radius:9px;background:#fff;color:#222;outline:none;-webkit-appearance:none}
+.field input:focus{border-color:#2E6DA4}
+.field input::placeholder{color:#C8CDD5;font-size:13px}
+.sex-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sb{padding:10px 8px;border:1.5px solid #DDE2EA;border-radius:9px;background:#fff;font-size:13px;font-weight:700;color:#888;cursor:pointer;text-align:center;width:100%}
+.sb.m{background:#1B3A5C;border-color:#1B3A5C;color:#fff}
+.sb.f{background:#8B1A1A;border-color:#8B1A1A;color:#fff}
+/* CrCl */
+.crcl-panel{border-radius:12px;margin-bottom:10px;display:none}
+.crcl-panel.show{display:block}
+.crcl-boxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.crcl-box{background:#0000FF;color:#fff;border-radius:14px;padding:16px 10px;text-align:center}
+.crcl-lbl{font-size:11px;font-weight:700;opacity:.95;margin-bottom:6px;line-height:1.35}
+.crcl-big{font-size:38px;font-weight:900;line-height:1;letter-spacing:-1px}
+.crcl-unit{font-size:11px;opacity:.8;margin:3px 0 8px}
+.crcl-stage{font-size:11px;font-weight:700;line-height:1.35;overflow-wrap:break-word}
+.crcl-info{font-size:11px;color:#666;text-align:center;padding:0 2px}
+.bg-g{background:#1A7A3C;color:#fff}.bg-b{background:#1B3A5C;color:#fff}
+.bg-a{background:#9a5a00;color:#fff}.bg-r{background:#8B1A1A;color:#fff}.bg-d{background:#2C2C2C;color:#fff}
+/* Severity */
+.sev-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.sev-title{font-size:11px;font-weight:700;color:#888;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.sev-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sev-btn{padding:14px 8px;border:2px solid #DDE2EA;border-radius:11px;background:#fff;font-size:14px;font-weight:700;color:#888;cursor:pointer;text-align:center;width:100%;line-height:1.4;transition:all .15s}
+.sev-btn .sev-icon{font-size:22px;display:block;margin-bottom:4px}
+.sev-btn .sev-label{font-size:13px;font-weight:700;display:block}
+.sev-btn .sev-sub{font-size:10px;font-weight:400;opacity:.8;display:block;margin-top:2px}
+.sev-btn.sev-on{background:#8B1A1A;border-color:#8B1A1A;color:#fff}
+.sev-btn.mild-on{background:#1A5C3B;border-color:#1A5C3B;color:#fff}
+/* AB select */
+.ab-group-title{font-size:11px;font-weight:700;color:#2E6DA4;letter-spacing:.3px;margin:10px 0 6px}
+.ab-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ab-idx{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.ab-idx.iv{background:#E6F1FB;color:#1B3A5C}
+.ab-idx.po{background:#E6F4EC;color:#1A5C3B}
+.ab-row select{flex:1;font-size:13px;padding:10px 11px;border:1.5px solid #DDE2EA;border-radius:9px;background:#fff;color:#222;outline:none}
+.calc-btn{width:100%;padding:15px;background:#0000FF;color:#fff;border:none;border-radius:11px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
+.calc-btn:active{opacity:.85}
+/* Result */
+.result-card{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.rc-hdr{padding:12px 14px;color:#fff;text-align:center}
+.rc-name{font-size:15px;font-weight:700;margin-bottom:1px}
+.rc-eng{font-size:10px;opacity:.8}
+.rc-sev-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-top:4px}
+.rc-body{padding:12px 14px}
+.ir{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:.5px solid #F0F4F8}
+.ir:last-of-type{border-bottom:none}
+.ir-lbl{font-size:11px;color:#888;flex-shrink:0;width:90px}
+.ir-val{font-size:13px;font-weight:600;color:#222;text-align:right;flex:1;word-break:keep-all;overflow-wrap:break-word}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin:1px}
+.bOK{background:#E6F4EC;color:#1A7A3C}.bWN{background:#FEF3E2;color:#9a5a00}.bER{background:#FDEAEA;color:#8B1A1A}
+.bBL{background:#E6F1FB;color:#1B3A5C}.bPU{background:#EDE6FB;color:#5B1A8B}.bGR{background:#E6F4EC;color:#1A5C3B}.bQT{background:#FDEAEA;color:#8B1A1A}
+.inf-box{background:#F0F4FA;border:1.5px solid #C5D8EF;border-radius:9px;padding:10px 12px;margin:8px 0}
+.inf-ttl{font-size:10px;font-weight:700;color:#1B3A5C;margin-bottom:5px}
+.inf-row{font-size:12px;color:#333;line-height:1.65;padding-left:16px;position:relative;margin-bottom:2px;word-break:keep-all;overflow-wrap:break-word}
+.inf-row::before{content:'•';position:absolute;left:0;color:#1A7A3C;font-size:14px;font-weight:700;line-height:1.4}
+.se-box{background:#FEF8EE;border:1px solid #f5c060;border-radius:9px;padding:9px 12px;margin-top:8px}
+.se-ttl{font-size:10px;font-weight:700;color:#9a5a00;margin-bottom:4px}
+.se-row{font-size:11px;color:#7a4800;line-height:1.65;padding-left:16px;position:relative;margin-bottom:2px}
+.se-row::before{content:'•';position:absolute;left:0;color:#D4780A;font-size:14px;font-weight:700;line-height:1.4}
+.note-box{font-size:11px;color:#555;padding:8px 10px;background:#F8F9FA;border-radius:8px;margin-top:6px;line-height:1.6}
+.zerb-box{background:#EDE6FB;border:1.5px solid #C0A8F0;border-radius:9px;padding:10px 12px;margin-top:8px}
+.zerb-ttl{font-size:10px;font-weight:700;color:#5B1A8B;margin-bottom:5px}
+.zerb-row{font-size:11px;color:#3a1060;line-height:1.65;padding-left:16px;position:relative;margin-bottom:2px;word-break:keep-all;overflow-wrap:break-word}
+.zerb-row::before{content:'•';position:absolute;left:0;color:#1A7A3C;font-size:14px;font-weight:700;line-height:1.4}
+/* Time picker */
+.time-picker-box{background:#F0FAF4;border:1.5px solid #1A5C3B;border-radius:9px;padding:10px 12px;margin:10px 0 4px}
+.time-picker-box.amber{background:#FEF8EE;border-color:#D4780A}
+.time-picker-lbl{font-size:11px;font-weight:700;color:#1A5C3B;margin-bottom:7px}
+.time-picker-box.amber .time-picker-lbl{color:#9a5a00}
+.time-picker-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.time-picker-row label{font-size:12px;color:#333}
+.time-picker-row input[type=time]{padding:8px 10px;font-size:15px;font-weight:700;border:1.5px solid #1A5C3B;border-radius:8px;background:#fff;color:#1A5C3B;outline:none;width:120px}
+.time-picker-box.amber .time-picker-row input[type=time]{border-color:#D4780A;color:#9a5a00}
+.time-picker-hint{font-size:10px;color:#666;margin-top:5px}
+.update-btn{padding:7px 14px;font-size:12px;font-weight:700;border:none;border-radius:7px;cursor:pointer;background:#1A5C3B;color:#fff}
+.time-picker-box.amber .update-btn{background:#D4780A}
+/* Day schedule */
+.day-sched{margin-top:8px;border-radius:9px;overflow:hidden;border:1.5px solid #ddd}
+.day-sched-ttl{font-size:11px;font-weight:700;padding:7px 12px;color:#fff;word-break:keep-all;overflow-wrap:break-word;text-align:center;line-height:1.5}
+.day-tbl{width:100%;border-collapse:collapse}
+.day-tbl th{font-size:10px;font-weight:700;padding:5px 6px;text-align:center;border-bottom:1.5px solid rgba(0,0,0,0.15);color:#fff;opacity:.9;white-space:nowrap}
+.day-tbl th:first-child{text-align:left;width:48px;white-space:nowrap}
+.day-tbl th:nth-child(2){width:90px}
+.day-tbl th:last-child{text-align:left}
+.day-tbl td{font-size:11px;padding:6px 5px;text-align:center;border-bottom:.5px solid #E8EEF4;vertical-align:top;line-height:1.45;word-break:keep-all;overflow-wrap:break-word}
+.day-tbl td:first-child{font-weight:700;text-align:left;white-space:nowrap;width:48px;vertical-align:middle}
+.day-tbl td:nth-child(2){text-align:left;width:90px;font-weight:600;word-break:keep-all}
+.day-tbl td:last-child{text-align:left;color:#555;word-break:keep-all}
+.day-tbl tr:last-child td{border-bottom:none}
+.day-leg{display:flex;gap:10px;padding:6px 10px;font-size:10px;flex-wrap:wrap;border-top:.5px solid #eee;background:#FAFAFA}
+/* Compact PO schedule table */
+.po-sched{margin-top:8px;border-radius:9px;overflow:hidden;border:1.5px solid #ddd}
+.po-sched-ttl{font-size:11px;font-weight:700;padding:7px 10px;color:#fff;word-break:keep-all;text-align:center}
+.po-tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.po-tbl th{font-size:10px;font-weight:700;padding:5px 6px;text-align:center;border-bottom:1.5px solid rgba(0,0,0,0.15);color:#fff;opacity:.9;overflow:hidden}
+.po-tbl th:first-child{text-align:left;width:44px}
+.po-tbl th:nth-child(2){width:80px}
+.po-tbl th:last-child{text-align:left}
+.po-tbl td{font-size:11px;padding:6px 5px;text-align:center;border-bottom:.5px solid #E8EEF4;vertical-align:top;line-height:1.45;word-break:keep-all;overflow-wrap:break-word;overflow:hidden}
+.po-tbl td:first-child{font-weight:700;text-align:left;white-space:nowrap;width:44px;vertical-align:middle}
+.po-tbl td:nth-child(2){text-align:left;width:80px;font-weight:600;word-break:keep-all;font-size:10px}
+.po-tbl td:last-child{text-align:left;color:#555;word-break:keep-all;font-size:10px}
+.po-tbl tr:last-child td{border-bottom:none}
+.dl-i{display:flex;align-items:center;gap:4px}
+.dl-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+/* Teico */
+.teico-wrap{margin-top:8px;border-radius:9px;overflow:hidden;border:1.5px solid #1A5C3B}
+.teico-ttl{background:#1A5C3B;color:#fff;font-size:11px;font-weight:700;padding:7px 12px;line-height:1.5;word-break:keep-all;text-align:center}
+.teico-tbl{width:100%;border-collapse:collapse}
+.teico-tbl th{background:#E8F5EE;color:#1A5C3B;font-size:10px;font-weight:700;padding:5px 6px;text-align:center;border-bottom:1.5px solid #1A5C3B}
+.teico-tbl th:first-child{text-align:left;width:56px;white-space:nowrap}
+.teico-tbl td{font-size:11px;padding:6px;text-align:center;border-bottom:.5px solid #C8E6D4;color:#333;line-height:1.4}
+.teico-tbl td:first-child{font-weight:700;color:#1A5C3B;text-align:left;white-space:nowrap;width:56px}
+.teico-tbl tr:last-child td{border-bottom:none}
+.td-ld{color:#9a5a00;font-weight:700}.td-md{color:#1A7A3C;font-weight:700}.td-no{color:#ccc}
+.teico-leg{display:flex;gap:10px;padding:6px 10px;background:#F8FCF9;font-size:10px;flex-wrap:wrap}
+.tl-i{display:flex;align-items:center;gap:4px}
+.tl-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.teico-note{font-size:10px;color:#555;padding:7px 10px;background:#F0FAF4;line-height:1.6}
+.reset-btn{width:100%;padding:11px;background:#EEF2F7;color:#666;border:1.5px solid #DDE2EA;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.footer{text-align:center;padding:9px 0 5px;font-size:11px;color:#aaa}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="hdr-top">
+    <h1>항생제 용량 계산기</h1>
+    <span class="hdr-jaae">JAAE Hospital</span>
+  </div>
+  <p>Cockcroft-Gault CrCl · 3종류의 주사 항생제 + 경구용 항생제</p>
+</div>
+
+<!-- 환자 정보 -->
+<div class="card">
+  <div class="card-title">환자 정보</div>
+  <div class="g2">
+    <div class="field"><label>나이 (세)</label><input type="number" id="age" placeholder="78" inputmode="numeric"></div>
+    <div class="field"><label>성별</label>
+      <div class="sex-row">
+        <button class="sb" id="bm" onclick="setSex('M')">♂ 남</button>
+        <button class="sb" id="bf" onclick="setSex('F')">♀ 여</button>
+      </div>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:4px">
+    <div class="field"><label>Cr (mg/dL)</label><input type="number" id="cr" placeholder="1.2" step="0.1" inputmode="decimal"></div>
+    <div class="field"><label>체중 ABW (kg)</label><input type="number" id="wt" placeholder="58" step="0.1" inputmode="decimal"></div>
+  </div>
+  <div style="font-size:10px;color:#aaa;padding-left:2px">※ IBW 기본값: 남성 70 kg / 여성 55 kg 자동 적용</div>
+</div>
+
+<!-- CrCl / eGFR 표시 -->
+<div class="crcl-panel" id="crclPanel">
+  <div class="crcl-boxes">
+    <div class="crcl-box">
+      <div class="crcl-lbl">Creatinine Clearance<br>(Cockcroft-Gault)</div>
+      <div class="crcl-big" id="crclNum">—</div>
+      <div class="crcl-unit">mL/min</div>
+      <div class="crcl-stage" id="crclStage"></div>
+    </div>
+    <div class="crcl-box">
+      <div class="crcl-lbl">eGFR<br>(CKD-EPI)</div>
+      <div class="crcl-big" id="egfrNum">—</div>
+      <div class="crcl-unit">mL/min/1.73m²</div>
+      <div class="crcl-stage" id="egfrStage"></div>
+    </div>
+  </div>
+  <div class="crcl-info" id="crclInfo"></div>
+</div>
+
+<!-- 중증도 선택 -->
+<div class="sev-card">
+  <div class="sev-title">감염 중증도 선택</div>
+  <div class="sev-row">
+    <button class="sev-btn" id="btn-sev" onclick="setSev(true)">
+      <span class="sev-icon">🔴</span>
+      <span class="sev-label">중증 감염</span>
+      <span class="sev-sub">패혈증·중증 폐렴·HAP/VAP</span>
+    </button>
+    <button class="sev-btn" id="btn-mild" onclick="setSev(false)">
+      <span class="sev-icon">🟡</span>
+      <span class="sev-label">일반/경증 감염</span>
+      <span class="sev-sub">지역사회 감염·경등도</span>
+    </button>
+  </div>
+</div>
+
+<!-- 항생제 선택 -->
+<div class="card">
+  <div class="card-title">항생제 선택</div>
+  <div class="ab-group-title">💉 주사용 항생제 (IV) — 최대 3종</div>
+  <div class="ab-row"><div class="ab-idx iv">1</div>
+    <select id="iv1">
+      <option value="">— IV 항생제 선택 —</option>
+      <option value="pip">Pip/Taz (타박탐주)</option>
+      <option value="mero">Meropenem (메펨주)</option>
+      <option value="teico">Teicoplanin (테이코신주)</option>
+      <option value="levo">Levofloxacin (레보카신주)</option>
+      <option value="ceftri">Ceftriaxone (세티악손주)</option>
+      <option value="cefe">Cefepime (세펨주)</option>
+      <option value="ceftaz">Ceftazidime (세프타지딤주)</option>
+      <option value="zerb">Zerbaxa (저박사주)</option>
+      <option value="genta">Gentamicin (겐타마이신주)</option>
+    </select></div>
+  <div class="ab-row"><div class="ab-idx iv">2</div>
+    <select id="iv2">
+      <option value="">— 선택 안함 —</option>
+      <option value="pip">Pip/Taz (타박탐주)</option>
+      <option value="mero">Meropenem (메펨주)</option>
+      <option value="teico">Teicoplanin (테이코신주)</option>
+      <option value="levo">Levofloxacin (레보카신주)</option>
+      <option value="ceftri">Ceftriaxone (세티악손주)</option>
+      <option value="cefe">Cefepime (세펨주)</option>
+      <option value="ceftaz">Ceftazidime (세프타지딤주)</option>
+      <option value="zerb">Zerbaxa (저박사주)</option>
+      <option value="genta">Gentamicin (겐타마이신주)</option>
+    </select></div>
+  <div class="ab-row"><div class="ab-idx iv">3</div>
+    <select id="iv3">
+      <option value="">— 선택 안함 —</option>
+      <option value="pip">Pip/Taz (타박탐주)</option>
+      <option value="mero">Meropenem (메펨주)</option>
+      <option value="teico">Teicoplanin (테이코신주)</option>
+      <option value="levo">Levofloxacin (레보카신주)</option>
+      <option value="ceftri">Ceftriaxone (세티악손주)</option>
+      <option value="cefe">Cefepime (세펨주)</option>
+      <option value="ceftaz">Ceftazidime (세프타지딤주)</option>
+      <option value="zerb">Zerbaxa (저박사주)</option>
+      <option value="genta">Gentamicin (겐타마이신주)</option>
+    </select></div>
+  <!-- teico time picker moved to result card -->
+  <div class="ab-group-title">💊 경구용 항생제 (PO) — 1종</div>
+  <div class="ab-row"><div class="ab-idx po">4</div>
+    <select id="po1">
+      <option value="">— PO 항생제 선택 —</option>
+      <option value="cipro">Ciprofloxacin (싸이플록신정)</option>
+      <option value="cefac">Cefaclor (크로세프캡슐)</option>
+      <option value="amox">Amoxycillin/Clavulanate (크라모넥스듀오정)</option>
+      <option value="tmx">TMP/SMX (셉트린정)</option>
+      <option value="mino">Minocycline (미노씬캡슐)</option>
+      <option value="vanco_po">Vancomycin PO (반코진캡슐)</option>
+      <option value="fluco">Fluconazole (푸루나졸정)</option>
+      <option value="metro">Metronidazole (후라시닐정)</option>
+    </select></div>
+  <button class="calc-btn" onclick="calculate()">용량 계산하기 →</button>
+</div>
+
+<div id="results"></div>
+</div>
+<div class="footer">Made by Kyung Ho Shin (2026. 6)</div>
+
+<script>
+var sex=null, severeMode=null, lastCrcl=null, UID=0;
+
+function setSex(s){
+  sex=s;
+  document.getElementById('bm').className='sb'+(s==='M'?' m':'');
+  document.getElementById('bf').className='sb'+(s==='F'?' f':'');
+  tryCalc();
+}
+
+function setSev(sev){
+  severeMode=sev;
+  document.getElementById('btn-sev').className='sev-btn'+(sev?' sev-on':'');
+  document.getElementById('btn-mild').className='sev-btn'+(!sev?' mild-on':'');
+}
+
+function calcIBW(m){return m?70:55;}
+function calcCG(a,c,w,m){return ((140-a)*w)/(72*c)*(m?1:0.85);}
+// CKD-EPI 2021 (race-free) creatinine equation
+function calcEGFR(a,c,m){
+  var k=m?0.9:0.7, al=m?-0.302:-0.241, sexF=m?1:1.012;
+  var ratio=c/k;
+  var minR=Math.min(ratio,1), maxR=Math.max(ratio,1);
+  return 142*Math.pow(minR,al)*Math.pow(maxR,-1.200)*Math.pow(0.9938,a)*sexF;
+}
+function crclStageEN(v){
+  return v>=60?'Normal / mild reduction':v>=40?'Mild–moderate reduction':v>=20?'Moderate–severe reduction':v>=10?'Severe reduction':'Kidney failure';
+}
+function egfrStageEN(v){
+  return v>=90?'G1 — Normal':v>=60?'G2 — Mildly decreased':v>=45?'G3a — Mildly-moderately decreased':v>=30?'G3b — Moderately-severely decreased':v>=15?'G4 — Severely decreased':'G5 — Kidney failure';
+}
+
+function tryCalc(){
+  var a=parseFloat(document.getElementById('age').value);
+  var c=parseFloat(document.getElementById('cr').value);
+  var w=parseFloat(document.getElementById('wt').value);
+  var panel=document.getElementById('crclPanel');
+  if(!a||!c||!w||!sex){panel.className='crcl-panel';return;}
+  var male=sex==='M', ibw=calcIBW(male), wt=w<=ibw?w:ibw;
+  var v=Math.round(calcCG(a,c,wt,male)*10)/10;
+  lastCrcl=v;
+  panel.className='crcl-panel show';
+  document.getElementById('crclNum').textContent=v;
+  var eg=Math.round(calcEGFR(a,c,male)*10)/10;
+  document.getElementById('egfrNum').textContent=eg;
+  document.getElementById('crclStage').textContent=crclStageEN(v);
+  document.getElementById('egfrStage').textContent=egfrStageEN(eg);
+  document.getElementById('crclInfo').textContent='IBW '+ibw+' kg'+(w>ibw?' → IBW 적용':' → ABW '+w+' kg 적용');
+}
+['age','cr','wt'].forEach(function(id){document.getElementById(id).addEventListener('input',tryCalc);});
+// teico time picker is inside result card
+
+/* ═══════════════════════ DRUG DATABASE ═══════════════════════════════════
+   dose(v, sev) → v=CrCl, sev=true(중증)/false(일반)
+   d=1회용량, f=간격, t=1일총량, inf=[투여방법 배열]
+   ※ inf 배열의 용량이 d와 반드시 일치해야 함
+═══════════════════════════════════════════════════════════════════════════ */
+var D={
+
+pip:{name:'Pip/Taz',kname:'타박탐주',hdr:'#1B3A5C',vial:'4.5 g/vial (Pip 4 g + Taz 0.5 g)',
+  pkpd:'Time-dependent (%T > MIC ≥ 50–100%)',elim:'신장(70%) · 담즙(20%)',qtc:false,
+  halflife:'Piperacillin 반감기: 1.0–1.2시간 (CrCl↓ 시 3–4시간으로 연장)',
+  dose:function(v,sev){
+    if(v>=40){
+      if(sev) return{d:'4.5 g',f:'q6h',t:'18 g/일 (4바이알) — 중증',p:'ok',pt:'✔ 중증 최대 용량',
+        inf:['NS 500 mL에 4바이알 mix',
+             'Loading Dose (LD): 처음 100 mL → 1시간 (100 mL/h)',
+             'Maintenance Dose (MD): 나머지 400 mL → 23시간 (17 mL/h)',
+             '중증·Pseudomonas nosocomial 감염 기준 | CrCl ≥ 60 권장']};
+      return{d:'4.5 g',f:'q8h',t:'13.5 g/일 (3바이알) — 일반',p:'ok',pt:'✔ 일반 표준 용량',
+        inf:['NS 500 mL에 3바이알 mix',
+             'Loading Dose (LD): 처음 100 mL → 1시간 (100 mL/h)',
+             'Maintenance Dose (MD): 나머지 400 mL → 23시간 (17 mL/h)']};
+    }
+    if(v>=20) return{d:'4.5 g',f:'q12h',t:'9 g/일 (2바이알)',p:'wn',pt:'⚠ 감량 (CrCl 20–40)',
+      inf:['NS 500 mL에 2바이알 mix',
+           'Loading Dose (LD): 처음 100 mL → 1시간 (100 mL/h)',
+           'Maintenance Dose (MD): 나머지 400 mL → 23시간 (17 mL/h)']};
+    if(v>=10) return{d:'2.25 g',f:'q12h',t:'4.5 g/일',p:'er',pt:'❌ 적극 감량 (CrCl <20)',
+      inf:['NS 100 mL에 2.25 g mix → 3시간 천천히 주입',
+           'Neurotoxicity (신경독성): 경련(Seizure)·혼돈(Confusion) 주의 관찰']};
+    return{d:'2.25 g',f:'q12h + HD 후 추가',t:'개별화',p:'er',pt:'❌ 전문의 상담',
+      inf:['투석 일정 고려 · Therapeutic Drug Monitoring (TDM) 권장']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승 — CrCl < 40 mL/min 시 위험 증가, Cr 모니터링 필수',
+      'Neurotoxicity (신경독성): 경련(Seizure)·혼돈(Confusion) — 총량 > 9 g/일 또는 CrCl < 40 시 위험, 고령(Elderly > 65세)·뇌전증(Epilepsy) 기저력 시 주의']},
+
+mero:{name:'Meropenem',kname:'메펨주',hdr:'#3B1F6E',vial:'1 g/vial, 2 g/vial',
+  pkpd:'Time-dependent (%T > MIC)',elim:'신장(70%) — CrCl↓ 시 반드시 감량',qtc:false,
+  halflife:'Meropenem 반감기: 1.0시간 (CrCl↓ 시 최대 3.8시간 연장) → Extended infusion 필수',
+  dose:function(v,sev){
+    if(v>=51){
+      if(sev) return{d:'2 g',f:'q8h',t:'6 g/일 — 중증',p:'ok',pt:'✔ 중증 최대 용량',
+        inf:['Loading Dose (LD): NS 100 mL에 2 g mix → 30분 IV (Cmax 확보)',
+             'Maintenance Dose (MD): NS 100 mL에 2 g mix → Extended infusion 3시간 (33 mL/h)',
+             '이후 q8h마다 3시간씩 Extended infusion 반복',
+             '★ 2 g q8h + Extended infusion → %T>MIC 극대화, MIC 4 μg/mL 이상 내성균에 효과']};
+      return{d:'1 g',f:'q8h',t:'3 g/일 — 일반',p:'ok',pt:'✔ 일반 표준 용량',
+        inf:['Loading Dose (LD): NS 100 mL에 1 g mix → 30분 IV',
+             'Maintenance Dose (MD): NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+             '이후 매 동일']};
+    }
+    if(v>=26) return{d:'2 g',f:'q12h',t:'4 g/일',p:'wn',pt:'⚠ 감량 (CrCl 26–50)',
+      inf:['Loading Dose (LD): NS 100 mL에 2 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 2 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 q8h마다 3시간씩 Extended infusion 반복']};
+    if(v>=10) return{d:'1 g',f:'q12h',t:'2 g/일',p:'wn',pt:'⚠ 추가 감량 (CrCl 10–25)',
+      inf:['Loading Dose (LD): NS 100 mL에 1 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 매 동일 (CrCl↓ 시 반감기 최대 3.8h → 축적 주의)']};
+    return{d:'0.5 g',f:'q24h',t:'0.5 g/일',p:'er',pt:'❌ 최소 용량',
+      inf:['NS 100 mL에 0.5 g mix → 30분 IV','Hemodialysis (HD, 혈액투석): 투석 후 투여 (반감기 최대 3.8시간 → 과다 축적 방지)']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승 — CrCl < 26 mL/min 또는 탈수 시 위험 증가',
+      'Neurotoxicity (신경독성): 경련(Seizure) — CrCl < 26 mL/min 시 위험, 뇌전증(Epilepsy)·고령(Elderly) 기저력 시 주의']},
+
+teico:{name:'Teicoplanin',kname:'테이코신주',hdr:'#1A5C3B',vial:'200 mg/vial, 400 mg/vial',
+  pkpd:'AUC/MIC (목표 AUC/MIC ≥ 900)',elim:'신장(주) · 담즙(일부) — CrCl↓ 시 간격 연장',qtc:false,
+  halflife:'Teicoplanin 반감기: 70–100시간 (매우 김) → q24h/q48h/q72h 간격 투여 근거',
+  hasTimePicker:true, timePickerColor:'green',
+  dose:function(v,sev){
+    if(v>=60){
+      if(sev) return{d:'400 mg',f:'Loading Dose (LD) q12h×3 → Maintenance Dose (MD) q12h',t:'400 mg/12h — 중증',p:'ok',pt:'✔ 중증 표준',tdm:true,
+        tdmNote:'Therapeutic Drug Monitoring (TDM) — Trough 목표 15–30 mg/L · Day 4 투여 직전 채혈',
+        inf:['Loading Dose (LD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h × 3회',
+             'Maintenance Dose (MD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h (Day 3부터, 중증 기준)']};
+      return{d:'400 mg',f:'Loading Dose (LD) q12h×3 → Maintenance Dose (MD) q24h',t:'400 mg/일 — 일반',p:'ok',pt:'✔ 일반 표준',tdm:true,
+        tdmNote:'Therapeutic Drug Monitoring (TDM) — Trough 목표 15–30 mg/L · Day 4 투여 직전 채혈',
+        inf:['Loading Dose (LD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h × 3회',
+             'Maintenance Dose (MD): 400 mg — NS 100 mL에 mix → 30분 IV · q24h (Day 3부터)']};
+    }
+    if(v>=40) return{d:'400 mg',f:'Loading Dose (LD) q12h×3 → Maintenance Dose (MD) q48h',t:'400 mg/48h',p:'wn',pt:'⚠ q48h 감량',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) 필수 — 축적 위험',
+      inf:['Loading Dose (LD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h × 3회',
+           'Maintenance Dose (MD): 400 mg — NS 100 mL에 mix → 30분 IV · q48h (Day 4부터)']};
+    if(v>=10) return{d:'400 mg',f:'Loading Dose (LD) q12h×3 → Maintenance Dose (MD) q72h',t:'400 mg/72h',p:'wn',pt:'⚠ q72h 감량',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) 필수 — 고도 축적 위험',
+      inf:['Loading Dose (LD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h × 3회',
+           'Maintenance Dose (MD): 400 mg — NS 100 mL에 mix → 30분 IV · q72h (Day 4부터)']};
+    return{d:'400 mg LD / 유지 200 mg',f:'Loading Dose (LD) q12h×3 → Maintenance Dose (MD) 200 mg q72h',t:'200 mg/72h',p:'er',pt:'❌ 전문의 상담',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) 필수',
+      inf:['Loading Dose (LD): 400 mg — NS 100 mL에 mix → 30분 IV · q12h × 3회',
+           'Maintenance Dose (MD): 200 mg — NS 100 mL에 mix → 30분 IV · q72h',
+           'Hemodialysis (HD, 혈액투석)로 제거 안 됨 → 투석 일정 무관 q72h 유지']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승 — 장기 축적 시 위험, Therapeutic Drug Monitoring (TDM) 필수',
+      'Red man syndrome (발적·소양감·저혈압) — 주입 속도 < 30분 시 발생, 30분 이상 천천히 주입으로 예방']},
+
+levo:{name:'Levofloxacin',kname:'레보카신주',hdr:'#6E3A00',vial:'750 mg/150 mL · 500 mg/100 mL — Ready-To-Use (RTU: 희석 없이 바로 주입 가능 제형)',
+  pkpd:'Concentration-dependent (AUC/MIC ≥ 125)',elim:'신장(85%) — CrCl↓ 시 감량 필수',qtc:true,
+  halflife:'Levofloxacin 반감기: 6–8시간 → q24h 투여로 AUC/MIC 목표 달성. Extended infusion 불필요 (Concentration-dependent)',
+  hasTimePicker:true, timePickerColor:'amber',
+  dose:function(v,sev){
+    if(v>=50){
+      if(sev) return{d:'750 mg',f:'q24h',t:'750 mg/일 — 중증',p:'ok',pt:'✔ 중증 최대 용량',
+        inf:['750 mg/150 mL Ready-To-Use (RTU) 백 → 90분 IV',
+             'RTU 백 그대로 사용 — 별도 희석·NS mix 불필요']};
+      return{d:'500 mg',f:'q24h',t:'500 mg/일 — 일반',p:'ok',pt:'✔ 일반 표준 용량',
+        inf:['500 mg/100 mL Ready-To-Use (RTU) 백 → 60분 IV',
+             'RTU 백 그대로 사용 — 별도 희석·NS mix 불필요']};
+    }
+    if(v>=20) return{d:'750 mg 초회 → 500 mg',f:'q24h',t:'500 mg/일',p:'wn',pt:'⚠ 감량 (CrCl 20–49)',
+      inf:['초회: 750 mg/150 mL Ready-To-Use (RTU) 백 → 90분 IV',
+           '이후: 500 mg/100 mL Ready-To-Use (RTU) 백 → 60분 IV · q24h']};
+    if(v>=10) return{d:'750 mg 초회 → 750 mg',f:'초회 후 q48h',t:'750 mg/48h',p:'wn',pt:'⚠ 추가 감량 (CrCl 10–19)',
+      inf:['초회: 750 mg/150 mL Ready-To-Use (RTU) 백 → 90분 IV',
+           '이후: 750 mg/150 mL Ready-To-Use (RTU) 백 → 90분 IV · q48h (바이알 단위 유지, 간격 연장)']};
+    return{d:'500 mg 초회 → 500 mg',f:'초회 후 q48h',t:'500 mg/48h',p:'er',pt:'❌ 최소 용량',
+      inf:['최소 용량 · 전문의 판단 필요']};
+  },
+  se:['QTc 연장 (QT prolongation) · Torsades de Pointes (TdP, 첨단 비틀림 심실빈맥): HERG 칼륨채널 차단 → 심근 재분극 지연. FDA 허가사항에 QTc 연장 및 TdP 경고 명시. 2020년 연구: 심장 질환 환자 80% 이상에서 평균 +15.68 ms QTc 연장. [기준] QTc > 500 ms → 금기 | QTc 460–500 ms → 투여 다음날 ECG 재확인 권장 | 기저치 대비 > 60 ms 증가 → 즉시 중단',
+      'Tendon rupture (건파열): 아킬레스건(Achilles tendon) 파열 — 고령(Elderly > 60세)·스테로이드(Steroid) 병용·CrCl↓ 시 위험↑, 힘줄 통증·부종 시 즉시 중단']},
+
+ceftri:{name:'Ceftriaxone',kname:'세티악손주',hdr:'#005566',vial:'1 g/vial, 2 g/vial',
+  pkpd:'Time-dependent (%T > MIC)',elim:'담즙(50%) · 신장(50%) — 신기능 조정 불필요',qtc:false,
+  halflife:'Ceftriaxone 반감기: 6–8시간 (단백결합 85–95% → free fraction 청소율 낮음) → 30분 주입으로도 q12h/q24h 투여 시 %fT>MIC 달성 충분',
+  dose:function(v,sev){
+    if(sev) return{d:'2 g',f:'q12h',t:'4 g/일 — 중증',p:'ok',pt:'✔ 중증 표준',
+      inf:['NS 100 mL에 2 g mix → 30분 IV',
+           '중증 폐렴 기준: 2 g q12h (4 g/일)',
+           '★ 반감기 6–8h (단백결합 85–95%) → 30분 주입으로도 %fT>MIC 달성 충분']};
+    return{d:'2 g',f:'q24h',t:'2 g/일 — 일반',p:'ok',pt:'✔ 일반 표준',
+      inf:['NS 100 mL에 2 g mix → 30분 IV',
+           '일반 감염 기준: 2 g q24h (2 g/일)',
+           '신기능 무관하게 동일 용량 적용']};
+  },
+  se:['Biliary sludge (담즙슬러지)·담석 — 장기 사용 시, 복통·황달 발생 시 확인',
+      'Clostridioides difficile 장염 — 광범위 스펙트럼으로 장내균총 변화']},
+
+cefe:{name:'Cefepime',kname:'세펨주',hdr:'#2D4A6E',vial:'1 g/vial',
+  pkpd:'Time-dependent (%T > MIC)',elim:'신장(85%) — CrCl↓ 시 감량 필수 (신경독성!)',qtc:false,
+  halflife:'Cefepime 반감기: 약 2시간 (CrCl↓ 시 3–6시간) → 30분 주입만으로는 q8h 간격 중 MIC 이하 구간 발생. Extended infusion 3시간 필수 권장',
+  dose:function(v,sev){
+    if(v>=60){
+      if(sev) return{d:'2 g',f:'q8h',t:'6 g/일 — 중증',p:'ok',pt:'✔ 중증 최대 용량',
+        inf:['Loading Dose (LD): NS 100 mL에 2 g mix → 30분 IV (Cmax 확보)',
+             'Maintenance Dose (MD): NS 100 mL에 2 g mix → Extended infusion 3시간 (33 mL/h)',
+             '이후 매 8시간마다 3시간 Extended infusion 반복',
+             '★ 반감기 약 2시간 → Extended infusion으로 Pseudomonas %T>MIC 극대화']};
+      return{d:'2 g',f:'q12h',t:'4 g/일 — 일반',p:'ok',pt:'✔ 일반 표준 용량',
+        inf:['Loading Dose (LD): NS 100 mL에 2 g mix → 30분 IV',
+             'Maintenance Dose (MD): NS 100 mL에 2 g mix → Extended infusion 3시간 (33 mL/h)',
+             '이후 q12h마다 3시간씩 Extended infusion 반복']};
+    }
+    if(v>=30) return{d:'2 g',f:'q12h',t:'4 g/일',p:'wn',pt:'⚠ 감량 (CrCl 30–60)',
+      inf:['Loading Dose (LD): NS 100 mL에 2 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 2 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 q12h마다 3시간씩 Extended infusion 반복']};
+    if(v>=11) return{d:'1 g',f:'q12h',t:'2 g/일',p:'wn',pt:'⚠ 추가 감량 (CrCl 11–29)',
+      inf:['Loading Dose (LD): NS 100 mL에 1 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 q12h마다 3시간씩 Extended infusion 반복',
+           'Neurotoxicity (신경독성): 경련(Seizure)·혼돈(Confusion) — CrCl↓ 시 위험↑, 주의 관찰']};
+    return{d:'1 g',f:'q24h',t:'1 g/일',p:'er',pt:'❌ 최소 용량 (CrCl ≤10)',
+      inf:['NS 100 mL에 1 g mix → 3시간 Extended infusion (33 mL/h)',
+           'HD: 투석 후 추가 투여 · 신경독성 주의 관찰']};
+  },
+  se:['Neurotoxicity (신경독성)·Encephalopathy (뇌병증): 경련(Seizure)·혼돈(Confusion)·의식저하 — CrCl < 30 mL/min 시 매우 위험, 고령(Elderly > 65세)·뇌전증(Epilepsy) 기저력 시 위험↑↑, 증상 즉시 중단',
+      'Nephrotoxicity (신독성): Cr 상승 — 고용량(> 4 g/일) + 탈수 시']},
+
+ceftaz:{name:'Ceftazidime',kname:'세프타지딤주',hdr:'#1A3A5C',vial:'1 g/vial',
+  pkpd:'Time-dependent (%T > MIC)',elim:'신장(80–90%) — CrCl↓ 시 감량 필수',qtc:false,
+  halflife:'Ceftazidime 반감기: 약 1.9시간 (CrCl↓ 시 최대 9시간) → Extended infusion 3시간 권장',
+  dose:function(v,sev){
+    if(v>=51){
+      var d=sev?'2 g':'1 g', t=sev?'6 g/일 — 중증':'3 g/일 — 일반';
+      return{d:d,f:'q8h',t:t,p:'ok',pt:sev?'✔ 중증 최대 용량':'✔ 일반 표준 용량',
+        inf:['Loading Dose (LD): NS 100 mL에 '+d+' mix → 30분 IV (Cmax 확보)',
+             'Maintenance Dose (MD): NS 100 mL에 '+d+' mix → Extended infusion 3시간 (33 mL/h)',
+             '이후 q8h마다 3시간씩 Extended infusion 반복',
+             '★ Pseudomonas 포함 그람음성균 광범위 커버']};
+    }
+    if(v>=31) return{d:'1 g',f:'q8h',t:'3 g/일',p:'wn',pt:'⚠ 감량 (CrCl 31–50)',
+      inf:['Loading Dose (LD): NS 100 mL에 1 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 q8h마다 3시간씩 Extended infusion 반복']};
+    if(v>=16) return{d:'1 g',f:'q12h',t:'2 g/일',p:'wn',pt:'⚠ 추가 감량 (CrCl 16–30)',
+      inf:['Loading Dose (LD): NS 100 mL에 1 g mix → 30분 IV',
+           'Maintenance Dose (MD): NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+           '이후 q12h마다 3시간씩 Extended infusion 반복',
+           'CrCl↓ 시 반감기 최대 9시간 → 축적 주의, 신독성 모니터링 필수']};
+    return{d:'1 g',f:'q24h',t:'1 g/일',p:'er',pt:'❌ 최소 용량 (CrCl ≤15)',
+      inf:['NS 100 mL에 1 g mix → Extended infusion 3시간 (33 mL/h)',
+           'Hemodialysis (HD, 혈액투석): 투석 후 투여 | 축적 위험 — 신독성 모니터링 필수']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승 — 고용량 + 탈수 시 위험',
+      'Neurotoxicity (신경독성): 경련(Seizure)·혼돈(Confusion) — CrCl < 30 mL/min 시 위험']},
+
+zerb:{name:'Zerbaxa (Ceftolozane/Taz)',kname:'저박사주',hdr:'#3D2060',vial:'Ceftolozane 1 g + Tazobactam 0.5 g / vial (= 1.5 g)',
+  pkpd:'Time-dependent (fT > MIC ≥ 40–50%)',elim:'신장(주) — CrCl↓ 시 감량 필수 (축적 → 신기능 추가 악화)',qtc:false,
+  halflife:'Ceftolozane 반감기: 약 2.8시간 (CrCl↓ 시 연장) → Extended infusion 3시간으로 목표 달성 확률 (PTA: Probability of Target Attainment) ≈ 90% 달성',
+  dose:function(v,sev){
+    if(v>=51){
+      if(sev) return{d:'3 g (C 2 g/T 1 g)',f:'q8h',t:'9 g/일 — 중증 HAP/VAP',p:'ok',pt:'✔ 중증 최대 용량 (HAP/VAP)',zerb:false,
+        inf:['멸균증류수 10 mL로 2바이알 각각 재구성 후 NS 100 mL 백에 추가',
+             '중증 HAP/VAP 기준: 3 g → Extended infusion 3시간 (33 mL/h)',
+             'Pseudomonas aeruginosa 내성균 적응증']};
+      return{d:'1.5 g (C 1 g/T 0.5 g)',f:'q8h',t:'4.5 g/일 — 일반',p:'ok',pt:'✔ 일반 표준 용량',zerb:false,
+        inf:['멸균증류수 10 mL로 바이알 재구성 후 NS 100 mL 백에 추가',
+             '1시간 IV (표준) 또는 3시간 Extended infusion (권장)']};
+    }
+    if(v>=31) return{d:'750 mg (C 500 mg/T 250 mg)',f:'q8h',t:'2.25 g/일',p:'wn',pt:'⚠ 감량 (CrCl 31–50)',zerb:true,zn:'냉장(2–8°C) 24시간 안정 → 다음 q8h 투여 시 사용',
+      inf:['1바이알 멸균증류수 10 mL로 재구성 (약 11.4 mL)',
+           '절반(~5.7 mL)만 NS 100 mL에 추가 → 750 mg',
+           '3시간 Extended infusion (33 mL/h) 권장',
+           '나머지 절반 냉장(2–8°C) 보관 → 다음 q8h 투여 시 사용']};
+    if(v>=16) return{d:'375 mg',f:'q8h 또는 750 mg q24h',t:'1.125 g/일',p:'wn',pt:'⚠ 추가 감량 (CrCl 16–29)',zerb:true,zn:'냉장 24h 안정. 1바이알 → 4회 분할 사용',
+      inf:['옵션 A: 375 mg q8h — 1바이알을 4회 분할 사용',
+           '옵션 B: 750 mg → NS 250 mL + 4시간 Extended infusion → q24h',
+           '목표 달성 확률 (PTA: Probability of Target Attainment) ≈ 90%',
+           '의미: 1,000명 중 약 900명에서 항생제 농도가 MIC 이상 유지 (Monte Carlo 시뮬레이션 근거)']};
+    return{d:'사용 비권장',f:'—',t:'—',p:'er',pt:'❌ 사용 비권장 (CrCl < 15, 말기 신부전)',zerb:false,
+      inf:['End-Stage Renal Disease (ESRD, 말기 신부전): 대체 항생제 강력 권장','불가피 시: Loading 150 mg 후 75 mg q8h + Therapeutic Drug Monitoring (TDM)']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승 — 축적 시 신기능 추가 악화 악순환, CrCl 정기 모니터링 필수',
+      'Headache (두통)·Fever (발열)·Diarrhea (설사) — 비교적 경미']},
+
+genta:{name:'Gentamicin',kname:'겐타마이신주',hdr:'#4A1B0C',vial:'80 mg/2 mL',
+  pkpd:'Concentration-dependent (Peak/MIC ≥ 8–10)',elim:'신장(95%) — CrCl↓ 시 간격 연장, Therapeutic Drug Monitoring (TDM) 필수',qtc:false,
+  halflife:'Gentamicin 반감기: 2–3시간 (CrCl↓ 시 최대 24–48시간) → Concentration-dependent이므로 Extended infusion 불필요, 단시간 주입으로 높은 Peak 달성이 중요',
+  hasTimePicker:true, timePickerColor:'amber',
+  dose:function(v,sev){
+    var peakNote=sev?'중증 기준: Peak 목표 ≥ 10 mg/L (Trough < 2 mg/L)':'일반 기준: Peak 목표 8–10 mg/L (Trough < 2 mg/L)';
+    if(v>=60) return{d:'80 mg × 2앰플 (≈5–7 mg/kg)',f:'q24h',t:'160 mg/일',p:'wn',pt:'⚠ Therapeutic Drug Monitoring (TDM) 필수',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) — '+peakNote,
+      inf:['NS 100 mL에 2앰플(80 mg × 2) mix → 30분 IV',
+           'Extended interval dosing — 높은 Peak/MIC 달성이 핵심',
+           peakNote]};
+    if(v>=40) return{d:'80 mg × 2앰플 (≈4 mg/kg)',f:'q36h',t:'160 mg/36h',p:'wn',pt:'⚠ 감량 + Therapeutic Drug Monitoring (TDM)',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) — Trough < 2 mg/L 반드시 확인',
+      inf:['NS 100 mL에 2앰플(80 mg × 2) mix → 30분 IV',
+           '같은 용량, 간격만 연장 (Extended interval 전략)',
+           peakNote]};
+    if(v>=20) return{d:'80 mg × 2앰플 (≈3 mg/kg)',f:'q48h',t:'160 mg/48h',p:'er',pt:'❌ 사용 주의',tdm:true,
+      tdmNote:'Therapeutic Drug Monitoring (TDM) — Trough < 1 mg/L 목표 · 빈번한 모니터링 필수',
+      inf:['NS 100 mL에 2앰플(80 mg × 2) mix → 30분 IV',
+           '사용 극히 주의 — 대체 가능하면 대체 권장',
+           peakNote]};
+    return{d:'사용 회피 권장',f:'—',t:'—',p:'er',pt:'❌ 대체 항생제 권장',
+      inf:['CrCl < 20: 대체 항생제 강력 권장']};
+  },
+  se:['Nephrotoxicity (신독성): Cr 상승·AKI(급성 신손상) — Trough > 2 mg/L 시 위험, Therapeutic Drug Monitoring (TDM) 없이 투여 금지, Cr 이틀에 한 번 모니터링',
+      'Ototoxicity (이독성): 비가역적 난청(Hearing loss)·이명(Tinnitus)·현기증(Dizziness) — 누적 용량·기간 의존, 고령(Elderly)·Loop diuretic 병용 시 위험↑']},
+
+/* PO */
+cipro:{name:'Ciprofloxacin',kname:'싸이플록신정',hdr:'#5C3A1B',form:'250 mg/정',
+  pkpd:'Concentration-dependent (AUC/MIC)',elim:'신장(40–50%) · 담즙(30%)',qtc:true,
+  halflife:'Ciprofloxacin 반감기: 3–5시간 → q12h 복용으로 AUC/MIC 목표 달성',
+  dose:function(v,sev){
+    if(v>=50) return{d:sev?'750 mg':'500 mg',f:'q12h',t:sev?'6정/일 — 중증':'4정/일 — 일반',p:'ok',pt:'✔ 표준'};
+    if(v>=30) return{d:'250–500 mg',f:'q12h',t:'2–4정/일',p:'wn',pt:'⚠ 감량'};
+    return{d:'250–500 mg',f:'q18–24h',t:'1–2정/일',p:'er',pt:'❌ 감량'};
+  },adm:'식사 무관 · 우유·제산제와 2시간 간격',
+  se:['QTc 연장 (QT prolongation): QTc > 500 ms 시 금기 — 레보플록사신보다 위험 낮으나 병용 QT 연장 약물 주의, ECG 확인',
+      'Tendon rupture (건파열) — 고령(Elderly > 60세)·스테로이드 병용 시 위험↑']},
+
+cefac:{name:'Cefaclor',kname:'크로세프캡슐',hdr:'#2D5C3A',form:'250 mg/캡슐',
+  pkpd:'Time-dependent (%T > MIC)',elim:'신장(60–85%) — 대부분 조정 불필요',qtc:false,
+  halflife:'Cefaclor 반감기: 약 0.8시간 → q8h 분할 투여 필요',
+  dose:function(v,sev){
+    if(v>=30) return{d:sev?'500 mg':'250 mg',f:'q8h',t:sev?'6캡슐/일 — 중증':'3캡슐/일 — 일반',p:'ok',pt:'✔ 표준'};
+    return{d:'250 mg',f:'q8h',t:'3캡슐/일',p:'wn',pt:'⚠ 감량 고려'};
+  },adm:'식후 복용 권장 (흡수율↑)',
+  se:['Serum sickness-like reaction (혈청병 유사 반응): 피부 발진(Rash)·관절통',
+      'Diarrhea (설사)·Nausea (오심) — 소화기 부작용']},
+
+amox:{name:'Amoxycillin/Clavulanate',kname:'크라모넥스듀오정',hdr:'#3A1B5C',form:'Amox 500 mg + Clav 125 mg / 정',
+  pkpd:'Time-dependent (%T > MIC)',elim:'신장(Amox 70%) · 간(Clav)',qtc:false,
+  halflife:'Amoxicillin 반감기: 1.0–1.3시간 / Clavulanate: 약 1시간 → q8h 분할 투여 필요. ※ 875 mg 제형(q12h) 미보유 시 500 mg×1정 q8h이 동등 대안 (FDA 기준)',
+  dose:function(v,sev){
+    if(v>=30) return{d:'1정 (Amox 500 mg + Clav 125 mg)',f:'q8h',t:'3정/일 (Amox 1,500 mg)',p:'ok',pt:'✔ 중증·일반 동일',
+      note:'※ 중증 기준: 500 mg q8h = 875 mg q12h와 동등 효과 (FDA 허가사항) | 병원 보유 500 mg+125 mg 제형 기준 중증 최적 용량'};
+    if(v>=10) return{d:'1정 (Amox 500 mg + Clav 125 mg)',f:'q12h',t:'2정/일',p:'wn',pt:'⚠ 감량 (CrCl 10–30)',
+      note:'CrCl < 30: 875 mg 제형 금기 → 500 mg q12h 감량 (FDA 기준)'};
+    return{d:'1정 (Amox 500 mg + Clav 125 mg)',f:'q24h',t:'1정/일',p:'er',pt:'❌ 최소 (CrCl < 10)'};
+  },adm:'식사 중 또는 직후 복용 필수 (위장 장애↓ · Clavulanate 흡수율↑)',
+  se:['Hepatotoxicity (간독성): AST/ALT 상승 — Clavulanate 성분, 장기 사용 시 간기능 모니터링',
+      'Diarrhea (설사)·Nausea (오심) — 광범위 스펙트럼 장내균총 변화']},
+
+tmx:{name:'TMP/SMX',kname:'셉트린정',hdr:'#2D3A6E',form:'TMP 80 mg + SMX 400 mg / 정',
+  pkpd:'Time-dependent (%T > MIC) — bactericidal combination',elim:'신장(80%) — CrCl↓ 시 감량 또는 금기',qtc:false,
+  halflife:'TMP 반감기: 8–11시간 / SMX: 9–11시간 → q12h 투여로 %fT>MIC 달성',
+  dose:function(v,sev){
+    if(v>=30) return{d:'2정 (TMP 160 mg + SMX 800 mg)',f:'q12h',t:'4정/일',p:'ok',pt:'✔ 표준 최대 용량'};
+    if(v>=15) return{d:'1정 (TMP 80 mg + SMX 400 mg)',f:'q12h',t:'2정/일',p:'wn',pt:'⚠ 50% 감량 (CrCl 15–30)'};
+    return{d:'사용 금기',f:'—',t:'—',p:'er',pt:'❌ 금기 (CrCl < 15)'};
+  },adm:'식사 무관 · 충분한 수분 섭취 필수 (결정뇨 예방) · 엽산(Folic acid) 결핍 환자 주의',
+  se:['Hyperkalemia (고칼륨혈증)·Nephrotoxicity (신독성): Cr 상승 — CrCl↓·RAAS 억제제 병용 시 위험↑, K⁺·Cr 모니터링 필수',
+      'Skin reaction (피부 반응)·SJS: 발진(Rash)·Stevens-Johnson syndrome — 설파계(Sulfonamide) 과민반응, 발진 즉시 중단']},
+
+mino:{name:'Minocycline',kname:'미노씬캡슐',hdr:'#1A3A1A',form:'50 mg/캡슐',
+  pkpd:'Time-dependent + Concentration (혼합형)',elim:'담즙·장관(주) · 신장(10%) — 신기능 조정 불필요',qtc:false,
+  halflife:'Minocycline 반감기: 11–23시간 → q12h 투여 충분, 신기능 조정 불필요',
+  dose:function(v,sev){return{d:'100 mg (초회 200 mg)',f:'q12h',t:'4캡슐/일',p:'ok',pt:'✔ 신기능 조정 불필요'};},
+  adm:'충분한 물과 함께 · 누운 채 복용 금지 (식도 자극)',
+  se:['Vestibular toxicity (전정 독성): 어지럼증(Dizziness)·구역 — 고령(Elderly)에서 흔함',
+      'Photosensitivity (광과민성)·피부 착색 — 장기 사용 시, 자외선 차단 권장']},
+
+vanco_po:{name:'Vancomycin PO',kname:'반코진캡슐',hdr:'#1A3A5C',form:'250 mg/캡슐',
+  pkpd:'국소 작용 (장내) — 전신 흡수 없음',elim:'장내 국소 — 신기능 조정 불필요',qtc:false,
+  halflife:'Vancomycin PO — 장관 내 국소 작용, 전신 흡수 없으므로 반감기 적용 불가',
+  dose:function(v,sev){return{d:'125–250 mg',f:'q6h',t:'2–4캡슐/일',p:'ok',pt:'✔ 신기능 조정 불필요'};},
+  adm:'식사 무관 · Clostridioides difficile 장염 적응증 (전신 감염에는 효과 없음)',
+  se:['Nausea (오심)·쓴맛 — 복용 순응도 저하','장내 균총 변화 — 장기 사용 시']},
+
+fluco:{name:'Fluconazole',kname:'푸루나졸정',hdr:'#5C1A3A',form:'150 mg/정',
+  pkpd:'AUC/MIC (항진균)',elim:'신장(80%) — CrCl↓ 시 감량',qtc:true,
+  halflife:'Fluconazole 반감기: 30시간 → q24h 투여로 AUC/MIC 목표 달성. CrCl↓ 시 q48h',
+  dose:function(v,sev){
+    if(v>=50){
+      if(sev) return{d:'400 mg 초회 → 400 mg',f:'q24h',t:'2–3정/일 — 중증 (침습 칸디다)',p:'ok',pt:'✔ 중증 표준'};
+      return{d:'200 mg 초회 → 100–200 mg',f:'q24h',t:'1–2정/일 — 일반 (점막 감염)',p:'ok',pt:'✔ 일반 표준'};
+    }
+    if(v>=20) return{d:'100–200 mg 초회 → 100 mg',f:'q24h',t:'1정/일',p:'wn',pt:'⚠ 50% 감량'};
+    return{d:'100 mg',f:'q48h',t:'약 0.7정/2일',p:'er',pt:'❌ 최소 감량'};
+  },adm:'식사 무관 · 와파린·스타틴·사이클로스포린 병용 시 혈중 농도 상승 주의',
+  se:['QTc 연장 (QT prolongation): QTc > 500 ms 시 금기 — CYP3A4 억제로 레보플록사신 등 병용 약물 QTc 추가 연장, ECG 필수',
+      'Hepatotoxicity (간독성): AST/ALT 상승 — 고용량(≥ 400 mg/일) 장기 사용 시, 간기능 모니터링']},
+
+metro:{name:'Metronidazole',kname:'후라시닐정',hdr:'#3A3A1A',form:'250 mg/정',
+  pkpd:'Concentration-dependent + Time-dependent (혼합형)',elim:'간(주) · 신장(일부) — 대부분 신기능 조정 불필요',qtc:false,
+  halflife:'Metronidazole 반감기: 6–8시간 → q8h 투여',
+  dose:function(v,sev){return{d:'500 mg',f:'q8h',t:'6정/일',p:'ok',pt:'✔ 신기능 조정 불필요'};},
+  adm:'식사 중 또는 직후 · 음주 절대 금지 (Disulfiram 반응: 구역·홍조·빈맥)',
+  se:['Peripheral neuropathy (말초신경병증): 손발 저림(Numbness·Tingling) — 장기·고용량 사용 시',
+      'Nausea (오심)·금속 맛(Metallic taste)·두통 — 흔한 소화기 부작용']}
+};
+
+/* ═══════════════════════ PO COMPACT SCHEDULE ═════════════════════════════ */
+function buildPOSched(key,crcl,sev,startH){
+  if(!startH && startH!==0) startH=9;
+  var rows=[], hdrColor='#1B3A5C', title='';
+
+  function fmtHour(h){
+    var ap=h<12?'오전':'오후', h12=h%12||12;
+    return ap+' '+h12+'시';
+  }
+
+  function getDay(offsetH){
+    var absH=startH+offsetH;
+    return {day:Math.floor(absH/24)+1, hour:absH%24};
+  }
+
+  function addToMap(map, offsetH, data){
+    var dt=getDay(offsetH);
+    if(dt.day>=1 && dt.day<=6){
+      if(!map[dt.day]) map[dt.day]=[];
+      data.timeLabel=fmtHour(dt.hour);
+      map[dt.day].push(data);
+    }
+  }
+
+  var map={};
+
+  if(key==='mino'){
+    hdrColor='#1A3A1A'; title='Minocycline (미노씬캡슐) Day 1-6';
+    addToMap(map,0,{dose:'200 mg (초회 Loading Dose)',note:'물과 함께 · 누운 채 금지',ld:true});
+    for(var h=12;h<=120;h+=12)
+      addToMap(map,h,{dose:'100 mg',note:'물과 함께 · 누운 채 복용 금지',ld:false});
+  }
+  else if(key==='vanco_po'){
+    hdrColor='#1A3A5C'; title='Vancomycin PO (반코진캡슐) Day 1-6';
+    for(var h=0;h<=120;h+=6)
+      addToMap(map,h,{dose:'125-250 mg',note:'Clostridioides difficile 장염',ld:h===0});
+  }
+  else if(key==='fluco'){
+    hdrColor='#5C1A3A'; title='Fluconazole (푸루나졸정) Day 1-6';
+    var d1,dr,intv;
+    if(crcl>=50&&sev){d1='400 mg (LD)';dr='400 mg';intv=24;}
+    else if(crcl>=50){d1='200 mg (LD)';dr='100-200 mg';intv=24;}
+    else if(crcl>=20){d1='200 mg (LD)';dr='100 mg (감량)';intv=24;}
+    else{d1='100 mg';dr='100 mg';intv=48;}
+    addToMap(map,0,{dose:d1,note:'초회 복용',ld:true});
+    for(var h=intv;h<=120;h+=intv)
+      addToMap(map,h,{dose:dr,note:intv===48?'q48h 격일':'q24h | 식사 무관',ld:false});
+  }
+  else if(key==='metro'){
+    hdrColor='#3A3A1A'; title='Metronidazole (후라시닐정) Day 1-6';
+    for(var h=0;h<=120;h+=8)
+      addToMap(map,h,{dose:'500 mg (2정)',note:'식사 중 · 음주 금지',ld:h===0});
+  }
+
+  for(var d=1;d<=6;d++){
+    var ent=map[d];
+    if(ent&&ent.length){
+      var hasLD=ent.some(function(e){return e.ld;});
+      var doseHtml='';
+      ent.forEach(function(e){
+        doseHtml+='<strong>'+e.timeLabel+'</strong> - '+e.dose+'<br>';
+      });
+      rows.push({d:d,doseHtml:doseHtml,note:ent[0].note,
+        bg:hasLD?'#FFF8E8':'#F0F4FA',col:hasLD?'#9a5a00':hdrColor});
+    } else {
+      rows.push({d:d,doseHtml:'<span style="color:#bbb">-</span>',
+        note:'복용 없음',bg:'#FAFAFA',col:'#bbb'});
+    }
+  }
+
+  if(!rows.length) return '';
+
+  var rh='';
+  rows.forEach(function(r){
+    rh+='<tr style="background:'+r.bg+'">'
+      +'<td style="font-weight:700;color:'+r.col+';white-space:nowrap;padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:11px;vertical-align:middle;width:44px">Day '+r.d+'</td>'
+      +'<td style="color:'+r.col+';padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:11px;word-break:keep-all;vertical-align:top;line-height:1.5">'+r.doseHtml+'</td>'
+      +'<td style="color:#555;padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:10px;word-break:keep-all;overflow-wrap:break-word;vertical-align:top;line-height:1.45">'+r.note+'</td>'
+      +'</tr>';
+  });
+
+  var html='<div class="po-sched">'
+    +'<div class="po-sched-ttl" style="background:'+hdrColor+'">&#128197; '+title+'</div>'
+    +'<table class="po-tbl" style="table-layout:fixed;width:100%">'
+    +'<thead><tr>'
+    +'<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px;font-size:10px;width:44px">Day</th>'
+    +'<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px;font-size:10px">복용 시각 · 용량</th>'
+    +'<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px;font-size:10px;width:35%">비고</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rh+'</tbody></table>'
+    +'<div style="display:flex;gap:8px;padding:5px 8px;font-size:10px;background:#FAFAFA;border-top:.5px solid #eee;flex-wrap:wrap">'
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#FFF8E8;border:1px solid #9a5a00;flex-shrink:0"></span><span style="color:#9a5a00;font-weight:700">초회/Loading Dose (LD)</span></span> '
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#F0F4FA;border:1px solid #1B3A5C;flex-shrink:0"></span><span style="color:#555">유지 복용</span></span> '
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#FAFAFA;border:1px solid #bbb;flex-shrink:0"></span><span style="color:#aaa">복용 없음</span></span>'
+    +'</div></div>';
+  return html;
+}
+
+
+/* ═══ ABSOLUTE TIME HELPER ═══════════════════════════════════════════════
+   offsetToDateTime(startH, offsetH)
+   → startH: 0-23 (hour when first dose is given on Day 1)
+   → offsetH: hours elapsed since that first dose
+   Returns {day:1-6, hour:0-23, label:'오전/오후 N시'}
+═══════════════════════════════════════════════════════════════════════════ */
+function offsetToDateTime(startH, offsetH){
+  var absH = startH + offsetH;
+  var day  = Math.floor(absH / 24) + 1;
+  var hour = absH % 24;
+  var ap   = hour < 12 ? '오전' : '오후';
+  var h12  = hour % 12 || 12;
+  return {day: day, hour: hour, label: ap + ' ' + h12 + '시'};
+}
+
+function buildDaySched(key,crcl,sev,startH){
+  var rows=[], hdrColor='#1B3A5C', title='';
+  if(key==='teico') return '';
+
+  /* ── LEVOFLOXACIN ─────────────────────────────────────────────────── */
+  if(key==='levo'){
+    hdrColor='#6E3A00';
+    title='Levofloxacin (레보카신주) Day별 투여 스케줄';
+
+    // Determine dose string and infusion note by CrCl/severity
+    var doseStr, infNote, interval; // interval in hours
+    if(crcl>=50 && sev){
+      doseStr='750 mg'; infNote='750 mg/150 mL RTU 백 → 90분 IV'; interval=24;
+    } else if(crcl>=50){
+      doseStr='500 mg'; infNote='500 mg/100 mL RTU 백 → 60분 IV'; interval=24;
+    } else if(crcl>=20){
+      // Day1 초회 750 mg, 이후 500 mg q24h
+      interval=24;
+    } else if(crcl>=10){
+      doseStr='750 mg'; infNote='750 mg/150 mL RTU 백 → 90분 IV'; interval=48;
+    } else {
+      doseStr='500 mg'; infNote='500 mg/100 mL RTU 백 → 60분 IV'; interval=48;
+    }
+
+    // Build dose times using absolute time
+    var doseTimes=[]; // [{offsetH, dose, note, isFirst}]
+    if(crcl>=20 && crcl<50){
+      // First dose 750mg, then 500mg q24h
+      doseTimes.push({off:0,  dose:'750 mg (초회 Loading Dose)', note:'750 mg/150 mL RTU 백 → 90분 IV', first:true});
+      for(var h=24; h<=120; h+=24)
+        doseTimes.push({off:h, dose:'500 mg', note:'500 mg/100 mL RTU 백 → 60분 IV', first:false});
+    } else {
+      var isFirst=true;
+      for(var h=0; h<=120; h+=interval){
+        doseTimes.push({off:h, dose:isFirst?(doseStr+' (초회 Loading Dose)'):doseStr, note:infNote, first:isFirst});
+        isFirst=false;
+      }
+    }
+
+    // Group by day
+    var dayMap={};
+    doseTimes.forEach(function(dt){
+      var info=offsetToDateTime(startH, dt.off);
+      if(info.day>=1 && info.day<=6){
+        if(!dayMap[info.day]) dayMap[info.day]=[];
+        dayMap[info.day].push({time:info.label, dose:dt.dose, note:dt.note, first:dt.first});
+      }
+    });
+
+    for(var d=1; d<=6; d++){
+      var entries=dayMap[d];
+      if(entries && entries.length){
+        var isLD=entries.some(function(e){return e.first;});
+        var doseHtml=entries.map(function(e){
+          return '<strong>'+e.time+'</strong> — '+e.dose;
+        }).join('<br>');
+        var noteHtml=entries[0].note;
+        rows.push({d:d, doseHtml:doseHtml, note:noteHtml,
+          bg:isLD?'#FFF8E8':'#F0F4FA', col:isLD?'#9a5a00':'#6E3A00'});
+      } else {
+        // No dose this day
+        rows.push({d:d, doseHtml:'<span style="color:#bbb">—</span>',
+          note:'투여 없음 ('+interval+'h 간격)', bg:'#FAFAFA', col:'#bbb'});
+      }
+    }
+
+  /* ── GENTAMICIN ───────────────────────────────────────────────────── */
+  } else if(key==='genta'){
+    hdrColor='#4A1B0C';
+    title='Gentamicin (겐타마이신주) Day별 스케줄<br>— Therapeutic Drug Monitoring (TDM) 필수';
+
+    // Determine interval by CrCl
+    var interval=crcl>=60?24:crcl>=40?36:crcl>=20?48:0;
+    if(interval===0){ return ''; }
+
+    var peakGoal=sev?'Peak ≥ 10 mg/L':'Peak 8–10 mg/L';
+    var tdmNote='★ Therapeutic Drug Monitoring (TDM) — Trough 채혈 (투여 직전)';
+
+    // Build dose times
+    var doseTimes=[];
+    var isFirst=true;
+    for(var h=0; h<=130; h+=interval){
+      doseTimes.push({off:h, first:isFirst});
+      isFirst=false;
+    }
+
+    // Group by day
+    var dayMap={};
+    doseTimes.forEach(function(dt,idx){
+      var info=offsetToDateTime(startH, dt.off);
+      if(info.day>=1 && info.day<=6){
+        if(!dayMap[info.day]) dayMap[info.day]=[];
+        // Mark Day 4 (4th dose) for TDM
+        dayMap[info.day].push({time:info.label, first:dt.first, doseNum:idx+1});
+      }
+    });
+
+    for(var d=1; d<=6; d++){
+      var entries=dayMap[d];
+      if(entries && entries.length){
+        var isLD=entries.some(function(e){return e.first;});
+        // Check if any is 4th dose (TDM day)
+        var isTDM=entries.some(function(e){return e.doseNum===4;});
+        var timeLabels=entries.map(function(e){
+          return '<strong>'+e.time+'</strong>';
+        }).join(', ');
+        var noteStr='NS 100 mL · 30분 IV | '+peakGoal;
+        if(isTDM) noteStr+='\n'+tdmNote;
+        rows.push({d:d,
+          doseHtml:timeLabels+'<br>80 mg × 2앰플',
+          note:noteStr.replace('\n','<br>'),
+          bg:isTDM?'#FEF8EE':isLD?'#FFF8E8':'#F0F4FA',
+          col:isTDM?'#9a5a00':isLD?'#9a5a00':'#4A1B0C'});
+      } else {
+        rows.push({d:d,
+          doseHtml:'<span style="color:#bbb">—</span>',
+          note:'투여 없음 (q'+interval+'h 간격)',
+          bg:'#FAFAFA', col:'#bbb'});
+      }
+    }
+
+  /* ── FLUCONAZOLE (IV-like schedule, q24h or q48h) ─────────────────── */
+  } else if(key==='fluco'){
+    hdrColor='#5C1A3A';
+    title='Fluconazole (푸루나졸정) Day별 복용 스케줄';
+    var d1,dr,n1,nr,interval;
+    if(crcl>=50&&sev){d1='400 mg (LD)';dr='400 mg';n1='초회 복용 (침습 칸디다)';nr='오전 9시 q24h';interval=24;}
+    else if(crcl>=50){d1='200 mg (LD)';dr='100–200 mg';n1='초회 복용';nr='오전 9시 q24h';interval=24;}
+    else if(crcl>=20){d1='200 mg (LD)';dr='100 mg (감량)';n1='초회 복용';nr='오전 9시 q24h';interval=24;}
+    else{d1='100 mg';dr='100 mg';n1='오전 9시';nr='격일 q48h';interval=48;}
+    var doseTimes=[{off:0,first:true,dose:d1,note:n1}];
+    var done=false;
+    for(var h=interval;h<=120;h+=interval)
+      doseTimes.push({off:h,first:false,dose:dr,note:nr});
+    var dayMap={};
+    doseTimes.forEach(function(dt){
+      var info=offsetToDateTime(startH,dt.off);
+      if(info.day>=1&&info.day<=6){
+        if(!dayMap[info.day])dayMap[info.day]=[];
+        dayMap[info.day].push({time:info.label,dose:dt.dose,note:dt.note,first:dt.first});
+      }
+    });
+    for(var d=1;d<=6;d++){
+      var entries=dayMap[d];
+      if(entries&&entries.length){
+        var isLD=entries.some(function(e){return e.first;});
+        rows.push({d:d,
+          doseHtml:entries.map(function(e){return '<strong>'+e.time+'</strong> — '+e.dose;}).join('<br>'),
+          note:entries[0].note,bg:isLD?'#FFF8E8':'#F0F4FA',col:isLD?'#9a5a00':'#5C1A3A'});
+      } else {
+        rows.push({d:d,doseHtml:'<span style="color:#bbb">—</span>',
+          note:'복용 없음 (q'+interval+'h 간격)',bg:'#FAFAFA',col:'#bbb'});
+      }
+    }
+  }
+
+  if(!rows.length) return '';
+
+  /* ── RENDER TABLE ─────────────────────────────────────────────────── */
+  var rowHtml=rows.map(function(r){
+    return '<tr style="background:'+r.bg+'">'+
+      '<td style="font-weight:700;color:'+r.col+';white-space:nowrap;padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:11px;vertical-align:middle;width:44px">Day '+r.d+'</td>'+
+      '<td style="color:'+r.col+';padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:11px;word-break:keep-all;vertical-align:top;line-height:1.5">'+r.doseHtml+'</td>'+
+      '<td style="color:#555;padding:6px 5px;border-bottom:.5px solid #E8EEF4;font-size:10px;word-break:keep-all;overflow-wrap:break-word;vertical-align:top;line-height:1.45">'+r.note+'</td>'+
+    '</tr>';
+  }).join('');
+
+  return '<div class="day-sched" style="border-color:'+hdrColor+'">'+
+    '<div class="day-sched-ttl" style="background:'+hdrColor+'">&#128197; '+title+'</div>'+
+    '<table class="day-tbl" style="table-layout:fixed;width:100%">'+
+    '<thead><tr>'+
+      '<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px 5px;font-size:10px;width:44px">Day</th>'+
+      '<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px 5px;font-size:10px">투여 시각 · 용량</th>'+
+      '<th style="color:'+hdrColor+';border-bottom:1.5px solid '+hdrColor+';text-align:left;padding:5px 5px;font-size:10px;width:38%">투여 방법 / 비고</th>'+
+    '</tr></thead>'+
+    '<tbody>'+rowHtml+'</tbody></table>'+
+    '<div class="day-leg">'+
+      '<div class="dl-i"><div class="dl-dot" style="background:#FFF8E8;border:1px solid #9a5a00"></div><span style="color:#9a5a00;font-weight:700">LD (Loading Dose, 초회)</span></div>'+
+      '<div class="dl-i"><div class="dl-dot" style="background:#F0F4FA;border:1px solid #1B3A5C"></div><span style="color:#555">MD (Maintenance Dose)</span></div>'+
+      '<div class="dl-i"><div class="dl-dot" style="background:#FAFAFA;border:1px solid #bbb"></div><span style="color:#aaa">투여 없음</span></div>'+
+      '<div class="dl-i"><div class="dl-dot" style="background:#FEF8EE;border:1px solid #D4780A"></div><span style="color:#9a5a00;font-weight:700">★ TDM 채혈일</span></div>'+
+    '</div></div>';
+}
+
+/* ═══════════════════════ TEICO SCHEDULE ══════════════════════════════════ */
+function buildTeico(crcl,sev,startH){
+  var md,mdiHours,mdl,vial;
+  if(crcl>=60){
+    if(sev){md=400;mdiHours=12;mdl='q12h (중증)';vial='400 mg × 1바이알';}
+    else{md=400;mdiHours=24;mdl='q24h';vial='400 mg × 1바이알';}
+  } else if(crcl>=40){md=400;mdiHours=48;mdl='q48h';vial='400 mg × 1바이알';}
+  else if(crcl>=10){md=400;mdiHours=72;mdl='q72h';vial='400 mg × 1바이알';}
+  else{md=200;mdiHours=72;mdl='q72h';vial='200 mg × 1바이알';}
+
+  // offsetH = 시작 투여시각으로부터 흐른 시간(시간 단위)
+  var ldOffsets=[0,12,24], mdOffsets=[];
+  for(var t=48;t<=144;t+=mdiHours) mdOffsets.push(t);
+
+  // 절대시각(시작시각+offset)을 실제 달력일(Day)과 시각으로 변환
+  // 다른 스케줄 함수들(offsetToDateTime, buildPOSched의 getDay)과 동일한 규칙 사용:
+  //   absHour = startH + offsetH
+  //   day  = Math.floor(absHour/24) + 1   (1부터 시작)
+  //   hour = absHour % 24
+  function toDayHour(offsetH){
+    var absH=startH+offsetH;
+    return {day:Math.floor(absH/24)+1, hour:absH%24};
+  }
+  function fmtH(h){var ap=h<12?'오전':'오후',h12=h%12||12;return ap+' '+h12+'시';}
+
+  // 1~6일자별로 그날 발생하는 모든 투여(LD/MD)를 모음
+  var dayMap={};
+  function addDose(offsetH, tp, mg){
+    var dt=toDayHour(offsetH);
+    if(dt.day<1||dt.day>6) return; // Day 6 이후는 표 밖
+    if(!dayMap[dt.day]) dayMap[dt.day]=[];
+    dayMap[dt.day].push({tp:tp,hour:dt.hour,mg:mg});
+  }
+  ldOffsets.forEach(function(off){ addDose(off,'LD',400); });
+  mdOffsets.forEach(function(off){ addDose(off,'MD',md); });
+
+  function fd(d){
+    var ts=fmtH(d.hour);
+    if(d.tp==='LD') return '<span class="td-ld">'+d.mg+' mg<br><small>Loading Dose (LD) ('+ts+')</small></span>';
+    return '<span class="td-md">'+d.mg+' mg<br><small>Maintenance Dose (MD) ('+ts+')</small></span>';
+  }
+
+  var rows='';
+  for(var dayNum=1; dayNum<=6; dayNum++){
+    var ds=(dayMap[dayNum]||[]).slice().sort(function(a,b){return a.hour-b.hour;});
+    var hLD=ds.some(function(d){return d.tp==='LD';});
+    var hMD=ds.some(function(d){return d.tp==='MD';});
+    var bg=hLD?'#FFF8E8':hMD?'#F0FAF4':'#FAFAFA';
+    var cell=ds.length?ds.map(fd).join('<br>'):'<span class="td-no">—</span>';
+    var tot=ds.reduce(function(s,d){return s+d.mg;},0);
+    rows+='<tr style="background:'+bg+'"><td>Day '+dayNum+'</td><td>'+cell+'</td>'+
+      '<td>'+(ds.length?ds.length+'회':'<span class="td-no">—</span>')+'</td>'+
+      '<td>'+(tot?'<strong>'+tot+' mg</strong>':'<span class="td-no">—</span>')+'</td></tr>';
+  }
+
+  var ld1=toDayHour(0), ld2=toDayHour(12), ld3=toDayHour(24);
+  return '<div class="teico-wrap"><div class="teico-ttl">&#9827; 테이코플라닌 Day별 투여 스케줄 (Day 1–6)'+(sev?'<br>— 중증 기준 (MD q12h)':'')+' </div>'+
+    '<table class="teico-tbl"><thead><tr><th>일자</th><th>투여 시각 및 용량</th><th>횟수</th><th>일일 합계</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<div class="teico-leg">'+
+    '<div class="tl-i"><div class="tl-dot" style="background:#FFF8E8;border:1px solid #9a5a00"></div><span style="color:#9a5a00;font-weight:700">Loading Dose (LD) 400 mg</span></div>'+
+    '<div class="tl-i"><div class="tl-dot" style="background:#F0FAF4;border:1px solid #1A7A3C"></div><span style="color:#1A7A3C;font-weight:700">Maintenance Dose (MD) '+mdl+'</span></div>'+
+    '<div class="tl-i" style="margin-left:auto"><span style="color:#1A5C3B;font-weight:600">'+vial+'</span></div>'+
+    '</div>'+
+    '<div class="teico-note">'+
+    '※ Loading Dose (LD): 빠르게 목표 혈중 농도 달성을 위한 초회 고용량<br>'+
+    '※ Maintenance Dose (MD): 목표 농도를 지속 유지하기 위한 정기 투여량<br>'+
+    '※ Loading 시작: Day '+ld1.day+' '+fmtH(ld1.hour)+' 기준 → 1회차: Day '+ld1.day+' '+fmtH(ld1.hour)+' / 2회차: Day '+ld2.day+' '+fmtH(ld2.hour)+' / 3회차: Day '+ld3.day+' '+fmtH(ld3.hour)+'<br>'+
+    '※ Therapeutic Drug Monitoring (TDM): Loading Dose 3회 후 4번째 투여 직전 trough 채혈 → 목표 15–30 mg/L<br>'+
+    '※ 빈칸(—) = 해당 일자 투여 없음 ('+mdl+' 간격)</div></div>';
+}
+
+
+/* ═══════════════════════ TIME PICKER BUILDER ═════════════════════════════ */
+function buildTimePicker(key,crcl,sev,uid,color){
+  var isGreen=color==='green';
+  var btnCol=isGreen?'#1A5C3B':'#9a5a00';
+  var brdCol=isGreen?'#1A5C3B':'#D4780A';
+  var bgCls='time-picker-box'+(isGreen?'':' amber');
+  var tpId='tp_'+uid;
+  // Use inline onclick with escaped quotes for cross-browser compatibility
+  var onclk='updateSched(&quot;'+key+'&quot;,'+crcl+','+sev+',&quot;'+uid+'&quot;)';
+  return '<div class="'+bgCls+'" style="margin-top:10px">'
+    +'<div class="time-picker-lbl">&#128336; 첫 번째 투여 시각</div>'
+    +'<div style="display:flex;align-items:stretch;gap:8px">'
+    +'<input type="time" id="'+tpId+'" value="09:00" '
+    +'style="flex:1;padding:10px 12px;font-size:16px;font-weight:700;'
+    +'border:1.5px solid '+brdCol+';border-radius:9px;background:#fff;color:'+btnCol+';outline:none;min-width:0">'
+    +'<button onclick="'+onclk+'" '
+    +'style="padding:10px 16px;background:'+btnCol+';color:#fff;border:none;'
+    +'border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">'
+    +'Update &#10003;</button>'
+    +'</div>'
+    +'</div>';
+}
+
+/* ═══════════════════════ RENDER DRUG CARD ════════════════════════════════ */
+function rdr(key,crcl,sev,uid){
+  var d=D[key];if(!d)return'';
+  var r=d.dose(crcl,sev);
+  var tc=r.p==='ok'?'bOK':r.p==='wn'?'bWN':'bER';
+  var pc=d.pkpd.indexOf('Concentration')>=0?'bPU':d.pkpd.indexOf('AUC')>=0?'bBL':'bGR';
+  var ec=d.elim.indexOf('신장')>=0?'bWN':'bGR';
+  var steps=(r.inf||[]).map(function(s){return '<div class="inf-row">'+s+'</div>';}).join('');
+  var ibox=steps?'<div class="inf-box"><div class="inf-ttl">투여 방법 및 희석</div>'+steps+'</div>':'';
+  var sebox='<div class="se-box"><div class="se-ttl">⚠ 주요 부작용</div>'+(d.se||[]).map(function(s){return '<div class="se-row">'+s+'</div>';}).join('')+'</div>';
+  var qt=d.qtc?'<span class="badge bQT">⚠ QTc 모니터링 필요</span>':'';
+  var tdmb=r.tdm?'<span class="badge bQT">Therapeutic Drug Monitoring (TDM) 필수</span>':'';
+  var tdmn=r.tdm&&r.tdmNote?'<div class="note-box" style="border-left:3px solid #C0392B;color:#8B1A1A"><strong>Therapeutic Drug Monitoring (TDM):</strong> '+r.tdmNote+'</div>':'';
+  var adm=d.adm?'<div class="note-box"><strong>복용법:</strong> '+d.adm+'</div>':'';
+  var dnote=r.note?'<div class="note-box" style="border-left:3px solid #3A1B5C;color:#3A1B5C">'+r.note+'</div>':'';
+  var zb='';
+  if(r.zerb&&r.zn){
+    zb='<div class="zerb-box"><div class="zerb-ttl">💊 저박사 Zerbaxa 바이알 분할 보관 안내</div>'+
+      '<div class="zerb-row">1바이알을 멸균증류수 10 mL로 재구성 (Reconstitute, 약 11.4 mL 용액)</div>'+
+      '<div class="zerb-row">필요 용량 (5.7 mL OR 11.4 mL)만 NS 100 mL백에 추가 후 즉시 주입</div>'+
+      '<div class="zerb-row">나머지 재구성한 Zerbaxa: 냉장(2–8°C) 24시간 안정 → 다음 q8h 투여 시 사용 가능</div>'+
+      '<div class="zerb-row">NS 100 mL백에 희석한 Zerbaxa는 냉장(2–8°C)에서 7일간 유효</div></div>';
+  }
+  /* severity badge */
+  var sevBg=sev?'background:rgba(139,26,26,0.25)':'background:rgba(26,92,59,0.25)';
+  var sevTxt=sev?'🔴 중증 감염 기준':'🟡 일반/경증 감염 기준';
+  /* time picker */
+  var timePicker='';
+  if(d.hasTimePicker){
+    var isGreen=d.timePickerColor==='green';
+    var tpId='tp_'+uid;
+    var btnCol=isGreen?'#1A5C3B':'#9a5a00', brdCol=isGreen?'#1A5C3B':'#D4780A';
+    timePicker=buildTimePicker(key,crcl,sev,uid,d.timePickerColor);
+  }
+  var schedHtml='';
+  if(key==='teico'){
+    schedHtml='<div id="sched_'+uid+'">'+buildTeico(crcl,sev,9)+'</div>';
+  } else if(d.hasTimePicker){
+    schedHtml='<div id="sched_'+uid+'">'+buildDaySched(key,crcl,sev,9)+'</div>';
+  } else {
+    // Compact PO schedule for selected drugs
+    var PO_COMPACT=['mino','vanco_po','fluco','metro'];
+    if(PO_COMPACT.indexOf(key)>=0){
+      // PO drugs also get a time picker
+      var tpId2='tp_'+uid;
+      var btnCol2='#1A5C3B';
+      timePicker=buildTimePicker(key,crcl,sev,uid,'green');
+            var ps=buildPOSched(key,crcl,sev,9);
+      if(ps) schedHtml='<div id="sched_'+uid+'">'+ps+'</div>';
+    }
+  }
+  return '<div class="result-card" id="card_'+uid+'" data-key="'+key+'" data-crcl="'+crcl+'" data-sev="'+sev+'">'+
+    '<div class="rc-hdr" style="background:'+d.hdr+'">'+
+      '<div class="rc-name">'+d.name+'</div>'+
+      '<div class="rc-eng">'+d.kname+' · '+(d.vial||d.form||'')+'</div>'+
+      '<div class="rc-sev-badge" style="'+sevBg+'">'+sevTxt+'</div>'+
+    '</div>'+
+    '<div class="rc-body">'+
+      '<div class="ir"><span class="ir-lbl">1회 용량</span><span class="ir-val">'+r.d+'</span></div>'+
+      '<div class="ir"><span class="ir-lbl">투여 간격</span><span class="ir-val">'+r.f+'</span></div>'+
+      '<div class="ir"><span class="ir-lbl">1일 총량</span><span class="ir-val">'+r.t+'</span></div>'+
+      '<div style="margin:7px 0 5px">'+
+        '<span class="badge '+tc+'">'+r.pt+'</span>'+
+        '<span class="badge '+pc+'">'+d.pkpd.split('(')[0].trim().split(' ')[0]+'-dep</span>'+
+        '<span class="badge '+ec+'">'+d.elim.split('(')[0].trim().split('·')[0].trim()+' 배설</span>'+
+        qt+tdmb+
+      '</div>'+
+      '<div class="ir"><span class="ir-lbl">PK/PD</span><span class="ir-val" style="font-size:11px;color:#555">'+d.pkpd+'</span></div>'+
+      '<div class="ir"><span class="ir-lbl">반감기 (t½)</span><span class="ir-val" style="font-size:11px;color:#333;font-weight:600;word-break:keep-all;line-height:1.5">'+d.halflife+'</span></div>'+
+      '<div class="ir"><span class="ir-lbl">배설 경로</span><span class="ir-val" style="font-size:11px;color:#555">'+d.elim+'</span></div>'+
+      ibox+adm+dnote+tdmn+zb+sebox+timePicker+schedHtml+
+    '</div></div>';
+}
+
+function updateSched(key,crcl,sev,uid){
+  try{
+    var tEl=document.getElementById('tp_'+uid);
+    if(!tEl)return;
+    var raw=(tEl.value||'').trim();
+    var startH=9, startM=0;
+    var m=raw.match(/^(\d{1,2}):(\d{2})/);
+    if(m){
+      startH=parseInt(m[1],10);
+      startM=parseInt(m[2],10);
+      if(/pm/i.test(raw) && startH<12) startH+=12;
+      if(/am/i.test(raw) && startH===12) startH=0;
+    }
+    if(isNaN(startH)||startH<0||startH>23) startH=9;
+    var el=document.getElementById('sched_'+uid);
+    if(!el)return;
+    var PO_COMPACT=['mino','vanco_po','fluco','metro'];
+    if(key==='teico') el.innerHTML=buildTeico(crcl,sev,startH);
+    else if(PO_COMPACT.indexOf(key)>=0) el.innerHTML=buildPOSched(key,crcl,sev,startH);
+    else el.innerHTML=buildDaySched(key,crcl,sev,startH);
+  } catch(err){
+    console.error('updateSched error:', err);
+    alert('스케줄 업데이트 중 오류가 발생했습니다: '+err.message);
+  }
+}
+
+/* ═══════════════════════ TIME HELPER ════════════════════════════════════ */
+// getTeicoHour removed
+// applyTeicoTime removed - time picker now only in result card
+
+/* ═══════════════════════ CALCULATE ══════════════════════════════════════ */
+function calculate(){
+  var a=parseFloat(document.getElementById('age').value);
+  var c=parseFloat(document.getElementById('cr').value);
+  var w=parseFloat(document.getElementById('wt').value);
+  if(!a||a<18){alert('나이를 입력해주세요');return;}
+  if(!sex){alert('성별을 선택해주세요');return;}
+  if(!c||c<=0){alert('Cr 수치를 입력해주세요');return;}
+  if(!w||w<20){alert('체중을 입력해주세요');return;}
+  if(severeMode===null){alert('감염 중증도를 선택해주세요\n(중증 감염 또는 일반/경증 감염)');return;}
+  var male=sex==='M', ibw=calcIBW(male), wt=w<=ibw?w:ibw;
+  var crcl=Math.round(calcCG(a,c,wt,male)*10)/10;
+  lastCrcl=crcl;
+  var panel=document.getElementById('crclPanel');
+  panel.className='crcl-panel show';
+  document.getElementById('crclNum').textContent=crcl;
+  var eg=Math.round(calcEGFR(a,c,male)*10)/10;
+  document.getElementById('egfrNum').textContent=eg;
+  document.getElementById('crclStage').textContent=crclStageEN(crcl);
+  document.getElementById('egfrStage').textContent=egfrStageEN(eg);
+  document.getElementById('crclInfo').textContent='IBW '+ibw+' kg'+(w>ibw?' → IBW 적용':' → ABW '+w+' kg 적용');
+  var keys=[document.getElementById('iv1').value,document.getElementById('iv2').value,
+    document.getElementById('iv3').value,document.getElementById('po1').value].filter(function(v){return v;});
+  if(!keys.length){alert('항생제를 하나 이상 선택해주세요');return;}
+  var html='';
+  keys.forEach(function(k){var uid='u'+(++UID);html+=rdr(k,crcl,severeMode,uid);});
+  html+='<button class="reset-btn" onclick="resetAll()">↺ 다시 계산하기</button>';
+  document.getElementById('results').innerHTML=html;
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetAll(){
+  ['age','cr','wt'].forEach(function(id){document.getElementById(id).value='';});
+  ['iv1','iv2','iv3','po1'].forEach(function(id){document.getElementById(id).selectedIndex=0;});
+  sex=null;severeMode=null;lastCrcl=null;
+  document.getElementById('bm').className='sb';
+  document.getElementById('bf').className='sb';
+  document.getElementById('btn-sev').className='sev-btn';
+  document.getElementById('btn-mild').className='sev-btn';
+  document.getElementById('crclPanel').className='crcl-panel';
+  // teico time box removed from top
+  document.getElementById('results').innerHTML='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
